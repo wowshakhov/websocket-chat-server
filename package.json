@@ -1,0 +1,22 @@
+{
+  "name": "websocket-chat-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wowshakhov/websocket-chat-server.git"
+  },
+  "author": "Vladimir Shakhov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wowshakhov/websocket-chat-server/issues"
+  },
+  "homepage": "https://github.com/wowshakhov/websocket-chat-server#readme",
+  "dependencies": {
+    "ws": "^1.1.1"
+  }
+}
