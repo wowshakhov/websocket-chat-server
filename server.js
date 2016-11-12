@@ -1,14 +1,14 @@
-let WebSocketServer = require('ws').Server;
-let wss = new WebSocketServer({ port: 8080 });
-let clients = {};
+var WebSocketServer = require('ws').Server;
+var wss = new WebSocketServer({ port: 8080 });
+var clients = {};
 
 console.log('server is now running');
 
 wss.on('connection', function connection(ws) {
 	
 	ws.on('message', function incoming(message) {
-		let msg = JSON.parse(message);
-		let op = msg.op;
+		var msg = JSON.parse(message);
+		var op = msg.op;
 		switch (op) {
 			case "connect":
 				console.log('connected: ' + msg.name);
@@ -20,7 +20,7 @@ wss.on('connection', function connection(ws) {
 				}));
 				update_contacts();
 				break;
-			case "send": 
+			case "sendmsg": 
 				console.log('message from ' + msg.from + ' to ' + msg.to + ': ' + msg.msg);
 				clients[msg.to].socket.send(JSON.stringify({
 					op: 'message',
@@ -34,16 +34,24 @@ wss.on('connection', function connection(ws) {
 	});
 
 	ws.on('close', function() {
+		for (var elem in clients) {
+			if (clients[elem].socket._socket.remoteAddress === ws._socket.remoteAddress &&
+				clients[elem].socket._socket.remotePort === ws._socket.remotePort) {
+				console.log(elem + ' disconnected');
+				delete clients[elem];
+			}
+		}
 		update_contacts();
 	});
 });
 
 function update_contacts() {
-	let contact_list = [];
+	var contact_list = [];
 	for (val in clients) {
 		contact_list.push(val);
 	}
-	let contact_list_string = contact_list.join(":");
+	var contact_list_string = contact_list.join(":");
+	console.log(contact_list_string);
 	for (val in clients) {
 		clients[val]['socket'].send(JSON.stringify({
 			op: 'update',
@@ -51,5 +59,3 @@ function update_contacts() {
 		}))
 	};
 }
-
-
