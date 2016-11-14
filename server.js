@@ -11,14 +11,29 @@ wss.on('connection', function connection(ws) {
 		var op = msg.op;
 		switch (op) {
 			case "connect":
-				console.log('connected: ' + msg.name);
-				clients[msg.name] = { socket: ws };
-				console.log('remote ip: ' + ws._socket.remoteAddress);
-				ws.send(JSON.stringify({
-					op: 'connection_status',
-					status: 'connected'
-				}));
-				update_contacts();
+				if (msg.name == "" || msg.name == "Me") {
+					ws.send(JSON.stringify({
+						op: 'connection_status',
+						status: 'invalid_name'
+					}));
+					break;
+				}
+				if (!clients[msg.name]) {
+					console.log('connected: ' + msg.name);
+					console.log('remote ip: ' + ws._socket.remoteAddress);
+					clients[msg.name] = { socket: ws };
+					ws.send(JSON.stringify({
+						op: 'connection_status',
+						status: 'connected'
+					}));
+					update_contacts();
+				}
+				else {
+					ws.send(JSON.stringify({
+						op: 'connection_status',
+						status: 'name_already_taken'
+					}));
+				}
 				break;
 			case "sendmsg": 
 				console.log('message from ' + msg.from + ' to ' + msg.to + ': ' + msg.msg);
