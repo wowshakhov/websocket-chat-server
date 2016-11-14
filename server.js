@@ -11,7 +11,8 @@ wss.on('connection', function connection(ws) {
 		var op = msg.op;
 		switch (op) {
 			case "connect":
-				if (msg.name == "" || msg.name == "Me") {
+				if (!msg.name || msg.name == "Me") {
+					console.log('NULL CONNECTED');
 					ws.send(JSON.stringify({
 						op: 'connection_status',
 						status: 'invalid_name'
