@@ -1,4 +1,4 @@
-# websocket-chat-server
+# Websocket chat server
 
 **Установка и запуск**
 
