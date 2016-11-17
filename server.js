@@ -1,24 +1,30 @@
-var WebSocketServer = require('ws').Server;
-var wss = new WebSocketServer({ port: 8080 });
-var clients = {};
+let WebSocketServer = require('ws').Server;
+let wss = new WebSocketServer({ port: 8080 });
+let clients = {};
 
 console.log('server is now running');
 
-wss.on('connection', function connection(ws) {
+/**
+ * Connection handler
+ */
+wss.on('connection', ws => {
     
-    ws.on('message', function incoming(message) {
-        var msg = JSON.parse(message);
-        var op = msg.op;
+    ws.on('message', message => {
+        let msg = JSON.parse(message);
+        let op = msg.op;
         switch (op) {
+            // Handle new connection
             case "connect":
+                // Incorrect name
                 if (!msg.name || msg.name == "Me") {
-                    console.log('NULL CONNECTED');
+                    console.log('connection error: invalid name');
                     ws.send(JSON.stringify({
                         op: 'connection_status',
                         status: 'invalid_name'
                     }));
                     break;
                 }
+                // Correct name and isn't taken
                 if (!clients[msg.name]) {
                     console.log('connected: ' + msg.name);
                     console.log('remote ip: ' + ws._socket.remoteAddress);
@@ -27,8 +33,9 @@ wss.on('connection', function connection(ws) {
                         op: 'connection_status',
                         status: 'connected'
                     }));
-                    update_contacts();
+                    updateContacts();
                 }
+                // Name already taken
                 else {
                     ws.send(JSON.stringify({
                         op: 'connection_status',
@@ -36,6 +43,7 @@ wss.on('connection', function connection(ws) {
                     }));
                 }
                 break;
+            // Handle new message
             case "sendmsg": 
                 console.log('message from ' + msg.from + ' to ' + msg.to + ': ' + msg.msg);
                 clients[msg.to].socket.send(JSON.stringify({
@@ -48,30 +56,33 @@ wss.on('connection', function connection(ws) {
                 break;
         }
     });
-
-    ws.on('close', function() {
-        for (var elem in clients) {
+    // Updates contact lists on disconnection 
+    ws.on('close', () => {
+        for (let elem in clients) {
             if (clients[elem].socket._socket.remoteAddress === ws._socket.remoteAddress &&
                 clients[elem].socket._socket.remotePort === ws._socket.remotePort) {
                 console.log(elem + ' disconnected');
                 delete clients[elem];
             }
         }
-        update_contacts();
+        updateContacts();
     });
 });
 
-function update_contacts() {
-    var contact_list = [];
+/**
+ * Updates users' contac lists
+ */
+function updateContacts() {
+    let contactList = [];
     for (val in clients) {
-        contact_list.push(val);
+        contactList.push(val);
     }
-    var contact_list_string = contact_list.join(":");
-    console.log(contact_list_string);
+    let contactListString = contactList.join(":");
+    console.log(contactListString);
     for (val in clients) {
         clients[val]['socket'].send(JSON.stringify({
             op: 'update',
-            contact_list: contact_list_string
+            contactList: contactListString
         }))
     };
 }
